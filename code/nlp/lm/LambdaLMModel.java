@@ -6,7 +6,7 @@ import java.util.*;
 
 public class LambdaLMModel implements LMModel{
     private double lambda;
-    private ArrayList<String> tokens;
+    private HashMap<String, HashMap<String, Double>> bigram;
 
     /**
      * Trains a language model on the given file and lambda value.
@@ -67,33 +67,26 @@ public class LambdaLMModel implements LMModel{
             if (!bigram.get(curToken).containsKey(nextToken))
                 bigram.get(curToken).put(nextToken, 0.0);
 
-            double numerator = bigram.get(curToken).get(nextToken) + 1.0;
-//            double denominator = wordCounts.get(curToken);
-
-//            System.out.println(curToken + " " + nextToken + " " + numerator + " " + denominator);
-
-            bigram.get(curToken).put(nextToken, numerator);
+            double count = bigram.get(curToken).get(nextToken) + 1.0;
+            bigram.get(curToken).put(nextToken, count);
         }
 
 
-        // normalize bigram probabilities over all words with lambda smoothing
+        // normalize bigram probabilities with lambda smoothing
         for (String outerKey: bigram.keySet()){
             double denominator = wordCounts.get(outerKey);
             for (String innerKey: bigram.get(outerKey).keySet()){
-                if (innerKey.equals("</s>"))
-                    continue;
-
                 double numerator = bigram.get(outerKey).get(innerKey);
-//                System.out.println(innerKey);
-//                System.out.println(wordCounts.get(innerKey));
-                bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * wordCounts.get(innerKey))));
+                bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * bigram.get(outerKey).size())));
             }
         }
 
-//
-//        System.out.println(main);
+        this.bigram = bigram;
+
+        System.out.println(main);
+//        System.out.println(bigram);
 //        System.out.println(wordCounts);
-        System.out.println(bigram);
+
     }
 
     /**
@@ -121,7 +114,11 @@ public class LambdaLMModel implements LMModel{
      * getBigramProb(hello, world) -> return p(world|hello) -> return words[hello][world]
      */
     public double getBigramProb(String first, String second){
-        return 0.0;
+        try {
+            return bigram.get(first).get(second);
+        } catch (NullPointerException e) {
+            return 0.0;
+        }
     }
 
     public static void main(String[] args) {
@@ -131,6 +128,8 @@ public class LambdaLMModel implements LMModel{
         double lambda = 1.0;
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
+        System.out.println(model.getBigramProb("b", "a"));
+        // d c 1/2
     }
 
 }
