@@ -7,6 +7,7 @@ import java.util.*;
 public class LambdaLMModel implements LMModel{
     private double lambda;
     private HashMap<String, HashMap<String, Double>> bigram;
+    private HashMap<String, Integer> wordCounts;
 
     /**
      * Trains a language model on the given file and lambda value.
@@ -21,7 +22,7 @@ public class LambdaLMModel implements LMModel{
         File file = new File(filename);
         ArrayList<String> main = new ArrayList<String>();
 
-        HashMap<String, Integer> wordCounts = new HashMap<String, Integer>();
+        wordCounts = new HashMap<String, Integer>();
         wordCounts.put("<unk>", 0);
         wordCounts.put("<s>", 0);
 
@@ -117,7 +118,26 @@ public class LambdaLMModel implements LMModel{
         try {
             return bigram.get(first).get(second);
         } catch (NullPointerException e) {
-            return 0.0;
+            /**
+             * Add new value to bigram at the first's key
+             * first = old key
+             * second = new val
+             *  1/3 a 2/3 b
+             * word counts ++
+             *
+             * new val
+             *
+             * old vals
+             */
+
+
+//            bigram.put(first, new HashMap<String, Double>());
+//            bigram.get(first).put(second, 0.0);
+//
+//            for (String key : bigram.get(first).keySet()){
+//                bigram.get(first).put(key, (double) (wordCounts.get(key)) / (wordCounts.get(first)));
+//            }
+//            return 0.0;
         }
     }
 
@@ -129,7 +149,7 @@ public class LambdaLMModel implements LMModel{
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
         System.out.println(model.getBigramProb("b", "a"));
-        // d c 1/2
+        System.out.println(model.bigram);
     }
 
 }
