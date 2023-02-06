@@ -7,7 +7,9 @@ import java.util.*;
 public class LambdaLMModel implements LMModel{
     private double lambda;
     private HashMap<String, HashMap<String, Double>> bigram;
+
     private HashMap<String, Integer> wordCounts;
+    private HashMap<String, HashMap<String, Double>> bigramCounts;
 
     /**
      * Trains a language model on the given file and lambda value.
@@ -72,6 +74,14 @@ public class LambdaLMModel implements LMModel{
             bigram.get(curToken).put(nextToken, count);
         }
 
+        // create a deep copy of bigram
+        bigramCounts = new HashMap<String, HashMap<String, Double>>();
+        for (String outerKey: bigram.keySet()){
+            bigramCounts.put(outerKey, new HashMap<String, Double>());
+            for (String innerKey: bigram.get(outerKey).keySet()){
+                bigramCounts.get(outerKey).put(innerKey, bigram.get(outerKey).get(innerKey));
+            }
+        }
 
         // normalize bigram probabilities with lambda smoothing
         for (String outerKey: bigram.keySet()){
@@ -83,10 +93,6 @@ public class LambdaLMModel implements LMModel{
         }
 
         this.bigram = bigram;
-
-        System.out.println(main);
-//        System.out.println(bigram);
-//        System.out.println(wordCounts);
 
     }
 
@@ -130,8 +136,9 @@ public class LambdaLMModel implements LMModel{
              * old vals
              */
 
+            bigram.put(first, new HashMap<String, Double>());
 
-//            bigram.put(first, new HashMap<String, Double>());
+
 //            bigram.get(first).put(second, 0.0);
 //
 //            for (String key : bigram.get(first).keySet()){
@@ -139,6 +146,7 @@ public class LambdaLMModel implements LMModel{
 //            }
 //            return 0.0;
         }
+        return 0.0;
     }
 
     public static void main(String[] args) {
@@ -150,6 +158,8 @@ public class LambdaLMModel implements LMModel{
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
         System.out.println(model.getBigramProb("b", "a"));
         System.out.println(model.bigram);
+        System.out.println(model.bigramCounts);
+        System.out.println(model.wordCounts);
     }
 
 }
