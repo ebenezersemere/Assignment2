@@ -82,7 +82,7 @@ public class LambdaLMModel implements LMModel{
         for (String outerKey: bigram.keySet()) {
             double denominator = wordCounts.get(outerKey);
             for (String innerKey : bigram.get(outerKey).keySet()) {
-                double numerator = bigram.get(outerKey).get(innerKey);
+                double numerator = countsMap.get(outerKey).get(innerKey);
                 bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * bigram.get(outerKey).size())));
             }
         }
@@ -137,12 +137,16 @@ public class LambdaLMModel implements LMModel{
 
             countsMap.get(first).put(second, 0.0);
 
+            System.out.println(countsMap.get(first).size());
+
             for (String key : bigram.get(first).keySet()){
                 System.out.println(countsMap.get(first).get(key) + lambda);
-                System.out.println(((countsMap.get(first).size()) + (lambda * countsMap.size())));
+                System.out.println(((countsMap.get(first).size()) + (lambda * (countsMap.get(first).size()-1))));
 
-                bigram.get(first).put(key, ((countsMap.get(first).get(key) + lambda) / ((countsMap.get(first).size()) + (lambda * countsMap.size()))));
+                bigram.get(first).put(key, ((countsMap.get(first).get(key) + lambda) / ((countsMap.get(first).size()-1) + (lambda * (countsMap.get(first).size())))));
             }
+
+            countsMap.get(first).remove(second, 0.0);
 
             return bigram.get(first).get(second);
         }
