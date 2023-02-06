@@ -8,6 +8,7 @@ public class LambdaLMModel implements LMModel{
     private double lambda;
     private HashMap<String, HashMap<String, Double>> bigram;
     private HashMap<String, Integer> wordCounts;
+    private HashMap<String, HashMap<String, Double>> countsMap;
 
     /**
      * Trains a language model on the given file and lambda value.
@@ -51,8 +52,7 @@ public class LambdaLMModel implements LMModel{
             System.out.println("File not found: " + file);
         }
 
-        // create bigram
-        HashMap<String, HashMap<String, Double>> bigram = new HashMap<String, HashMap<String, Double>>();
+        countsMap = new HashMap<String, HashMap<String, Double>>();
 
         for (int i = 0; i < main.size() - 1; i++) {
             String curToken = main.get(i);
@@ -62,29 +62,32 @@ public class LambdaLMModel implements LMModel{
                 continue;
             }
 
-            if (!bigram.containsKey(curToken))
-                bigram.put(curToken, new HashMap<String, Double>());
+            if (!countsMap.containsKey(curToken))
+                countsMap.put(curToken, new HashMap<String, Double>());
 
-            if (!bigram.get(curToken).containsKey(nextToken))
-                bigram.get(curToken).put(nextToken, 0.0);
+            if (!countsMap.get(curToken).containsKey(nextToken))
+                countsMap.get(curToken).put(nextToken, 0.0);
 
-            double count = bigram.get(curToken).get(nextToken) + 1.0;
-            bigram.get(curToken).put(nextToken, count);
+            double count = countsMap.get(curToken).get(nextToken) + 1.0;
+            countsMap.get(curToken).put(nextToken, count);
         }
 
+        // create bigram as a deep copy of countsMap
+        bigram = new HashMap<String, HashMap<String, Double>>();
+        for (Map.Entry<String, HashMap<String, Double>> entry : countsMap.entrySet()) {
+            bigram.put(entry.getKey(), new HashMap<String, Double>(entry.getValue()));
+        }
 
         // normalize bigram probabilities with lambda smoothing
-        for (String outerKey: bigram.keySet()){
+        for (String outerKey: bigram.keySet()) {
             double denominator = wordCounts.get(outerKey);
-            for (String innerKey: bigram.get(outerKey).keySet()){
+            for (String innerKey : bigram.get(outerKey).keySet()) {
                 double numerator = bigram.get(outerKey).get(innerKey);
                 bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * bigram.get(outerKey).size())));
             }
         }
 
-        this.bigram = bigram;
-
-        System.out.println(main);
+//        System.out.println(main);
 //        System.out.println(bigram);
 //        System.out.println(wordCounts);
 
@@ -130,25 +133,33 @@ public class LambdaLMModel implements LMModel{
              * old vals
              */
 
+            bigram.get(first).put(second, 0.0);
 
-//            bigram.put(first, new HashMap<String, Double>());
-//            bigram.get(first).put(second, 0.0);
-//
-//            for (String key : bigram.get(first).keySet()){
-//                bigram.get(first).put(key, (double) (wordCounts.get(key)) / (wordCounts.get(first)));
-//            }
-//            return 0.0;
+            countsMap.get(first).put(second, 0.0);
+
+            for (String key : bigram.get(first).keySet()){
+                System.out.println(countsMap.get(first).get(key) + lambda);
+                System.out.println(((countsMap.get(first).size()) + (lambda * countsMap.size())));
+
+                bigram.get(first).put(key, ((countsMap.get(first).get(key) + lambda) / ((countsMap.get(first).size()) + (lambda * countsMap.size()))));
+            }
+
+            return bigram.get(first).get(second);
         }
     }
 
     public static void main(String[] args) {
 
 //        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
-        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+//        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+        String filename = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/abc.txt";
         double lambda = 1.0;
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
+        System.out.println(model.countsMap);
+        System.out.println(model.bigram);
         System.out.println(model.getBigramProb("b", "a"));
+        System.out.println(model.countsMap);
         System.out.println(model.bigram);
     }
 
