@@ -8,7 +8,6 @@ public class LambdaLMModel implements LMModel{
     private double lambda;
     private HashMap<String, HashMap<String, Double>> bigram;
 
-    private HashMap<String, Integer> wordCounts;
     private HashMap<String, HashMap<String, Double>> bigramCounts;
 
     /**
@@ -24,7 +23,7 @@ public class LambdaLMModel implements LMModel{
         File file = new File(filename);
         ArrayList<String> main = new ArrayList<String>();
 
-        wordCounts = new HashMap<String, Integer>();
+        HashMap<String, Integer> wordCounts = new HashMap<String, Integer>();
         wordCounts.put("<unk>", 0);
         wordCounts.put("<s>", 0);
 
@@ -93,7 +92,6 @@ public class LambdaLMModel implements LMModel{
         }
 
         this.bigram = bigram;
-
     }
 
     /**
@@ -153,13 +151,12 @@ public class LambdaLMModel implements LMModel{
 
 //        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
         String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
-        double lambda = 1.0;
+        double lambda = 0.0;
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
         System.out.println(model.getBigramProb("b", "a"));
         System.out.println(model.bigram);
         System.out.println(model.bigramCounts);
-        System.out.println(model.wordCounts);
     }
 
 }
