@@ -75,13 +75,57 @@ public class LambdaLMModel implements LMModel{
         unigram.entrySet().removeIf(entry -> entry.getValue().equals(0));
     }
 
-
+    /**
+     * Given a sentence, return the log of the probability of the sentence based on the LM.
+     *
+     * @param sentWords the words in the sentence.  sentWords should NOT contain <s> or </s>.
+     * @return the log probability
+     */
     public double logProb(ArrayList<String> sentWords){
-        return 0.0;
+        sentWords.add(0, "<s>");
+        sentWords.add("</s>");
+
+        double sumProbs = 0;
+
+        for (int i = 0; i < sentWords.size() - 1; i++) {
+            double prob = Math.log10(getBigramProb(sentWords.get(i), sentWords.get(i+1)));
+            sumProbs += prob;
+        }
+
+        return sumProbs;
     }
 
-    public double getPerplexity(String filename){
-        return 0.0;
+    /**
+     * Given a text file, calculate the perplexity of the text file, that is the negative average per word log
+     * probability
+     *
+     * @param filename a text file.  The file will contain sentences WITHOUT <s> or </s>.
+     * @return the perplexity of the text in file based on the LM
+     */
+    public double getPerplexity(String filename) {
+        // process file
+        File file = new File(filename);
+
+        double probSum = 0;
+        int sentNum = 0;
+
+        // read file
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                // split line into words
+                String[] line = scanner.nextLine().split("\\s");
+                ArrayList<String> sentence = new ArrayList<>(Arrays.asList(line));
+
+                probSum += logProb(sentence);
+                sentNum++;
+            }
+
+            double avg = probSum / sentNum;
+            return Math.pow(10, -1 * avg);
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + filename);
+            return 0.0;
+        }
     }
 
     /**
