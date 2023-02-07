@@ -1,15 +1,17 @@
 package nlp.lm;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Array;
 import java.util.*;
 
-public class LambdaLMModel implements LMModel{
+public class LambdaLMModel implements LMModel {
     private double lambda;
     private HashMap<String, Integer> unigram;
     private HashMap<String, HashMap<String, Integer>> bigram;
 
-    public LambdaLMModel(String filename, double lambda){
+    public LambdaLMModel(String filename, double lambda) {
         // initialization
         this.lambda = lambda;
         unigram = new HashMap<String, Integer>();
@@ -34,7 +36,7 @@ public class LambdaLMModel implements LMModel{
                 unigram.put("<s>", unigram.get("<s>") + 1);
                 main.add("<s>");
 
-                for (String word: line) {
+                for (String word : line) {
                     if (!unigram.containsKey(word)) {
                         unigram.put("<unk>", unigram.get("<unk>") + 1);
                         unigram.put(word, 0);
@@ -57,7 +59,7 @@ public class LambdaLMModel implements LMModel{
             String curToken = main.get(i);
             String nextToken = main.get(i + 1);
 
-            if (curToken.equals("</s>")){
+            if (curToken.equals("</s>")) {
                 unigram.put("</s>", unigram.get("</s>") + 1);
                 continue;
             }
@@ -76,14 +78,44 @@ public class LambdaLMModel implements LMModel{
     }
 
 
-    public double logProb(ArrayList<String> sentWords){
-        return 0.0;
+    public double logProb(ArrayList<String> sentWords) {
+        sentWords.add(0, "<s>");
+        sentWords.add("</s>");
+
+        double log = 0.0;
+
+        for (int i = 0; i < sentWords.size() - 1; i++) {
+            log += Math.log10(getBigramProb(sentWords.get(i), sentWords.get(i + 1)));
+        }
+
+        return log;
     }
 
-    public double getPerplexity(String filename){
-        return 0.0;
-    }
+    public double getPerplexity(String filename) {
+        File file = new File(filename);
 
+        double probSum = 0.0;
+        int sentenceCount = 0;
+
+        try (Scanner scanner = new Scanner(file)) {
+
+            while (scanner.hasNextLine()) {
+                String[] line = scanner.nextLine().split("\\s");
+                ArrayList<String> sentence = new ArrayList<>(Arrays.asList(line));
+
+                probSum += logProb(sentence);
+                sentenceCount++;
+            }
+
+            double avg = probSum / sentenceCount;
+            return Math.pow(10, -1 * avg);
+
+        } catch (FileNotFoundException e){
+            System.out.println("File not found: " + filename);
+            return 0.0;
+        }
+    }
+    
     /**
      * We utilize a hashtable of hashtables, where the keys of the master hashtable are all the words of the corpus,
      * and the values are all hashtables, whose keys are all words that follow the master key, and whose values are
@@ -113,5 +145,9 @@ public class LambdaLMModel implements LMModel{
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
         System.out.println(model.bigram);
         System.out.println(model.unigram);
+
+        ArrayList<String> test = new ArrayList<>(Arrays.asList("a", "b", "c", "c", "c"));
+
+        System.out.println(model.logProb(test));
     }
 }
