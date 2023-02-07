@@ -151,7 +151,8 @@ public class LambdaLMModel implements LMModel{
     public static void main(String[] args) {
 
 //        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
-        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+//        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+        String filename = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/abc.txt";
         double lambda = 1.0;
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
