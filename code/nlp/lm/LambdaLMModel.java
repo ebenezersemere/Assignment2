@@ -6,9 +6,9 @@ import java.util.*;
 
 public class LambdaLMModel implements LMModel{
     private double lambda;
-    private HashMap<String, HashMap<String, Double>> bigram;
-
+    private HashMap<String, HashMap<String, Integer>> bigram;
     private HashMap<String, HashMap<String, Double>> bigramCounts;
+    HashMap<String, Integer> wordCounts;
 
     /**
      * Trains a language model on the given file and lambda value.
@@ -23,7 +23,7 @@ public class LambdaLMModel implements LMModel{
         File file = new File(filename);
         ArrayList<String> main = new ArrayList<String>();
 
-        HashMap<String, Integer> wordCounts = new HashMap<String, Integer>();
+        wordCounts = new HashMap<String, Integer>();
         wordCounts.put("<unk>", 0);
         wordCounts.put("<s>", 0);
 
@@ -53,7 +53,7 @@ public class LambdaLMModel implements LMModel{
         }
 
         // create bigram
-        HashMap<String, HashMap<String, Double>> bigram = new HashMap<String, HashMap<String, Double>>();
+        HashMap<String, HashMap<String, Integer>> bigram = new HashMap<String, HashMap<String, Integer>>();
 
         for (int i = 0; i < main.size() - 1; i++) {
             String curToken = main.get(i);
@@ -64,34 +64,37 @@ public class LambdaLMModel implements LMModel{
             }
 
             if (!bigram.containsKey(curToken))
-                bigram.put(curToken, new HashMap<String, Double>());
+                bigram.put(curToken, new HashMap<String, Integer>());
 
             if (!bigram.get(curToken).containsKey(nextToken))
-                bigram.get(curToken).put(nextToken, 0.0);
+                bigram.get(curToken).put(nextToken, 0);
 
-            double count = bigram.get(curToken).get(nextToken) + 1.0;
+            Integer count = bigram.get(curToken).get(nextToken) + 1;
             bigram.get(curToken).put(nextToken, count);
         }
+//
+//        // create a deep copy of bigram
+//        bigramCounts = new HashMap<String, HashMap<String, Double>>();
+//        for (String outerKey: bigram.keySet()){
+//            bigramCounts.put(outerKey, new HashMap<String, Double>());
+//            for (String innerKey: bigram.get(outerKey).keySet()){
+//                bigramCounts.get(outerKey).put(innerKey, bigram.get(outerKey).get(innerKey));
+//            }
+//        }
+//
+//        // normalize bigram probabilities with lambda smoothing
+//        for (String outerKey: bigram.keySet()){
+//            double denominator = wordCounts.get(outerKey);
+//            for (String innerKey: bigram.get(outerKey).keySet()){
+//                double numerator = bigram.get(outerKey).get(innerKey);
+//                bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * bigram.get(outerKey).size())));
+//            }
+//        }
 
-        // create a deep copy of bigram
-        bigramCounts = new HashMap<String, HashMap<String, Double>>();
-        for (String outerKey: bigram.keySet()){
-            bigramCounts.put(outerKey, new HashMap<String, Double>());
-            for (String innerKey: bigram.get(outerKey).keySet()){
-                bigramCounts.get(outerKey).put(innerKey, bigram.get(outerKey).get(innerKey));
-            }
-        }
 
-        // normalize bigram probabilities with lambda smoothing
-        for (String outerKey: bigram.keySet()){
-            double denominator = wordCounts.get(outerKey);
-            for (String innerKey: bigram.get(outerKey).keySet()){
-                double numerator = bigram.get(outerKey).get(innerKey);
-                bigram.get(outerKey).put(innerKey, (numerator + lambda) / (denominator + (lambda * bigram.get(outerKey).size())));
-            }
-        }
 
         this.bigram = bigram;
+//        this.bigramCounts = bigramCounts;
     }
 
     /**
@@ -122,20 +125,42 @@ public class LambdaLMModel implements LMModel{
         try {
             return bigram.get(first).get(second);
         } catch (NullPointerException e) {
+            // TODO: On the Fly
             /**
-             * Add new value to bigram at the first's key
+             * We need to recalculate lambda values for a bigram that we have not seen during training.
+             * The affected values will be all those at the main hashmap with the value of first.
+             * We key into the first values, and are presented with a collection of hashmaps.
+             * Each hashmap's value must be changed.
+             *
+             * We first check that first exists in the bigram, and that second exists in the bigram. DONE
+             *
+             * Next we have to calculate the probability of the new bigram.
+             *
+             * We have to calculate the values for the new and old bigrams.
+             *
+             * For the new bigram, the value is lambda / (number of times the first word appears in the corpus) + lambda
+             *
+             * For the old bigrams, the value is bigramCounts.get(first).get(second) / (number of times the first word appears in the corpus) + lambda
+             *
              * first = old key
              * second = new val
              *  1/3 a 2/3 b
              * word counts ++
-             *
              * new val
-             *
              * old vals
              */
 
-            bigram.put(first, new HashMap<String, Double>());
+//            if (!bigram.containsKey(first))
+//                bigram.put(first, new HashMap<String, Double>()); UNKUNKUNK!!! TODO UNK
 
+//            if (!bigram.get(first).containsKey(second))
+//                bigram.get(first).put(second, 0.0);
+//
+//            bigram.get(first).put(second, lambda / bigramCounts.get(first).get(second));
+//
+//            for (String key : bigram.get(first).keySet()){
+//                bigram.get(first).put(key, bigramCounts.get(first).get(second) / bigramCounts.get(first).get(second) + lambda);
+//            }
 
 //            bigram.get(first).put(second, 0.0);
 //
@@ -151,12 +176,15 @@ public class LambdaLMModel implements LMModel{
 
 //        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
         String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
-        double lambda = 0.0;
+        double lambda = 1.0;
 
         LambdaLMModel model = new LambdaLMModel(filename, lambda);
-        System.out.println(model.getBigramProb("b", "a"));
+//        System.out.println(model.getBigramProb("b", "a"));
         System.out.println(model.bigram);
-        System.out.println(model.bigramCounts);
+        // lambda / (unigram.counts.get(first).getValue() + unigramsCounts.size() * lambda)
+//        System.out.println(model.bigramCounts);
+        System.out.println(model.wordCounts);
+
     }
 
 }
