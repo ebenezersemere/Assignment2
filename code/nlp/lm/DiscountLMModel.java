@@ -4,14 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class LambdaLMModel implements LMModel{
-    private double lambda;
+public class DiscountLMModel implements LMModel{
+    private double discount;
     private HashMap<String, Integer> unigram;
     private HashMap<String, HashMap<String, Integer>> bigram;
 
-    public LambdaLMModel(String filename, double lambda) {
+    public DiscountLMModel(String filename, double discount) {
         // initialization
-        this.lambda = lambda;
+        this.discount = discount;
         unigram = new HashMap<String, Integer>();
         bigram = new HashMap<String, HashMap<String, Integer>>();
 
@@ -54,6 +54,10 @@ public class LambdaLMModel implements LMModel{
 
         // create unigram & bigram
         for (int i = 0; i < main.size() - 1; i++) {
+            if ((i + 1) % 4 == 0){
+                continue;
+            }
+
             String curToken = main.get(i);
             String nextToken = main.get(i + 1);
 
@@ -121,33 +125,34 @@ public class LambdaLMModel implements LMModel{
      * and the values are all hashtables, whose keys are all words that follow the master key, and whose values are
      * the bigram value of the two words.
      * getBigramProb(hello, world) -> return p(world|hello) p(hi| askjdhakjdhaskldhkas)
-     * lambda / (unigram.counts.get(first).getValue() + unigramsCounts.size() * lambda)
+     * discount / (unigram.counts.get(first).getValue() + unigramsCounts.size() * discount)
      */
     @Override
     public double getBigramProb(String first, String second){
-        // we have first
-        if (bigram.containsKey(first)){
-            if (bigram.get(first).containsKey(second)){
-                return (bigram.get(first).get(second) + lambda) / (((unigram.size() - 1) * lambda) + unigram.get(first));
-            }
-            return lambda / (((unigram.size() - 1) * lambda) + unigram.get(first));
-        }
-        throw new RuntimeException("check this");
-//        // we don't have first
-//        // decrement 1 from unigram size, as we don't want to consider p(<s>|first)
-//
-//
-//        // this won't happen
-//        first = "<unk>";
-//        return lambda / ((unigram.size() - 1) * lambda);
+        double reservedMass = (bigram.get(first).size() * discount) / (unigram.get(first));
+
+        // <3 I love streams :)
+        int uniSum = (unigram.keySet().stream()
+                .mapToInt(key -> unigram.get(key))
+                .sum()) - unigram.get("<s>");
+
+        double denominator = 1 - (bigram.get(first).keySet().stream()
+                .mapToDouble(key -> (unigram.get(key) / (double) uniSum))
+                .sum());
+
+        double alpha = reservedMass / denominator;
+
+        if (bigram.get(first).containsKey(second))
+            return bigram.get(first).get(second) - discount;
+        else
+            return alpha * (unigram.get(second) / (double) uniSum);
     }
-
     public static void main(String[] args) {
-
 //        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
         String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
-        double lambda = 1.0;
+        double discount = 0.5;
 
-        LambdaLMModel model = new LambdaLMModel(filename, lambda);
+        DiscountLMModel model = new DiscountLMModel(filename, discount);
     }
 }
+

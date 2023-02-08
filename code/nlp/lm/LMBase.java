@@ -4,14 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class LambdaLMModel implements LMModel{
-    private double lambda;
-    private HashMap<String, Integer> unigram;
-    private HashMap<String, HashMap<String, Integer>> bigram;
+abstract class LMBase implements LMModel {
+    protected HashMap<String, Integer> unigram;
+    protected HashMap<String, HashMap<String, Integer>> bigram;
 
-    public LambdaLMModel(String filename, double lambda) {
+    public LMBase(String filename) {
         // initialization
-        this.lambda = lambda;
         unigram = new HashMap<String, Integer>();
         bigram = new HashMap<String, HashMap<String, Integer>>();
 
@@ -75,8 +73,6 @@ public class LambdaLMModel implements LMModel{
         unigram.entrySet().removeIf(entry -> entry.getValue().equals(0));
     }
 
-
-    // preprocess sentwords
     public double logProb(ArrayList<String> sentWords) {
         sentWords.add(0, "<s>");
         sentWords.add("</s>");
@@ -104,50 +100,16 @@ public class LambdaLMModel implements LMModel{
 
                 bigramCount += sentence.size() - 1;
                 probSum += logProb(sentence);
-
             }
 
             double avg = probSum / bigramCount;
             return Math.pow(10, -1 * avg);
 
-        } catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             System.out.println("File not found: " + filename);
             return 0.0;
         }
     }
 
-    /**
-     * We utilize a hashtable of hashtables, where the keys of the master hashtable are all the words of the corpus,
-     * and the values are all hashtables, whose keys are all words that follow the master key, and whose values are
-     * the bigram value of the two words.
-     * getBigramProb(hello, world) -> return p(world|hello) p(hi| askjdhakjdhaskldhkas)
-     * lambda / (unigram.counts.get(first).getValue() + unigramsCounts.size() * lambda)
-     */
-    @Override
-    public double getBigramProb(String first, String second){
-        // we have first
-        if (bigram.containsKey(first)){
-            if (bigram.get(first).containsKey(second)){
-                return (bigram.get(first).get(second) + lambda) / (((unigram.size() - 1) * lambda) + unigram.get(first));
-            }
-            return lambda / (((unigram.size() - 1) * lambda) + unigram.get(first));
-        }
-        throw new RuntimeException("check this");
-//        // we don't have first
-//        // decrement 1 from unigram size, as we don't want to consider p(<s>|first)
-//
-//
-//        // this won't happen
-//        first = "<unk>";
-//        return lambda / ((unigram.size() - 1) * lambda);
-    }
-
-    public static void main(String[] args) {
-
-//        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
-        String filename = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
-        double lambda = 1.0;
-
-        LambdaLMModel model = new LambdaLMModel(filename, lambda);
-    }
+    public abstract double getBigramProb(String first, String second);
 }
