@@ -91,11 +91,11 @@ abstract class LMBase implements LMModel {
     }
 
     /**
-     * Returns p(second | first)
+     * logProb calculates the sum of the log probabilities of all bigrams in a sentence.
      *
      * @param first
      * @param second
-     * @return the probability of the second word given the first word (as a probability)
+     * @return the log probability of a sentence
      */
     public double logProb(ArrayList<String> sentWords) {
         // add <s> and </s> to start and end of sentence
@@ -115,7 +115,7 @@ abstract class LMBase implements LMModel {
     }
 
     /**
-     * Returns the perplexity of a file.
+     * getPerplexity calculates the perplexity of a file.
      *
      * @param filename the file to read from
      * @return the perplexity of the file

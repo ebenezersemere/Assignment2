@@ -13,23 +13,27 @@ public class LambdaLMModel extends LMBase{
     }
 
     /**
-     *
+     *      * getBigramProb computes the probability of the second word given the first word with lambda smoothing
      * @param first
      * @param second
-     * @return the probability of the second word given the first word (with lambda smoothing)
+     * @return p(second | first)
      */
     @Override
     public double getBigramProb(String first, String second) {
-        // we have first
-        if (bigram.containsKey(first)) {
-            if (bigram.get(first).containsKey(second)) {
-                return (bigram.get(first).get(second) + lambda) / (((unigram.size() - 1) * lambda) + unigram.get(first));
-            }
-            return lambda / (((unigram.size() - 1) * lambda) + unigram.get(first));
-        } else {
-            return lambda / ((unigram.size() - 1) * lambda) + bigram.get("<unk>").get(second);
+        // check whether first and second are in vocabulary
+        if (!bigram.containsKey(first))
+            first = "<unk>";
+
+        if (!unigram.containsKey(second))
+            second = "<unk>";
+
+        if (bigram.get(first).containsKey(second)) {
+            return (bigram.get(first).get(second) + lambda) / (((unigram.size() - 1) * lambda) + unigram.get(first));
         }
+
+        return lambda / (((unigram.size() - 1) * lambda) + unigram.get(first));
     }
+
 
     public static void main(String[] args) {
         String filenameMain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";

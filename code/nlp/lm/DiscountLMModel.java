@@ -13,10 +13,10 @@ public class DiscountLMModel extends LMBase{
     }
 
     /**
-     *
+     * getBigramProb computes the probability of the second word given the first word with discount smoothing
      * @param first
      * @param second
-     * @return the probability of the second word given the first word (with discount smoothing)
+     * @return p(second | first)
      */
     @Override
     public double getBigramProb(String first, String second){
@@ -28,7 +28,7 @@ public class DiscountLMModel extends LMBase{
         // sum the values from unigram
         int uniSum = (unigram.keySet().stream()
                 .mapToInt(key -> unigram.get(key))
-                .sum()) - unigram.get("<s>");
+                .sum());
 
         // 1 - (sum of unigram probabilities for values seen in first's bigram)
         double denominator = 1 - (bigram.get(first).keySet().stream()
