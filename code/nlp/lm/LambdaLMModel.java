@@ -36,8 +36,9 @@ public class LambdaLMModel extends LMBase{
 
 
     public static void main(String[] args) {
-        String filenameMain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
-        String filenameABC = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+//        String filenameMain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
+//        String filenameABC = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+        String filenameABC = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/abc.txt";
 
         double lambda = 1.0;
 
