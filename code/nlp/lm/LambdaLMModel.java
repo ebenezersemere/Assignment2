@@ -40,10 +40,10 @@ public class LambdaLMModel extends LMBase{
 //        String filenameABC = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
         String filenameABC = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/abc.txt";
 
+        String filenameTrain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentencesTrain";
+
         double lambda = 1.0;
 
-        LambdaLMModel model = new LambdaLMModel(filenameABC, lambda);
-
-        System.out.println(model.getBigramProb("a", "b"));
+        LambdaLMModel model = new LambdaLMModel(filenameTrain, lambda);
     }
 }
