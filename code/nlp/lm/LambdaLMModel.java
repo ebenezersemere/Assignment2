@@ -7,6 +7,13 @@ public class LambdaLMModel extends LMBase{
     // declare lambda
     private final double lambda;
 
+    /**
+     * Constructor for constructing a lambda smoothed language model from a file.
+     * Unigram and bigram maps are populated from the file.
+     *
+     * @param filename the file to read from
+     * @param lambda lambda to use for smoothing
+     */
     public LambdaLMModel(String filename, double lambda) {
         super(filename);
         this.lambda = lambda;

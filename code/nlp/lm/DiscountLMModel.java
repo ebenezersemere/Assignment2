@@ -10,6 +10,13 @@ public class DiscountLMModel extends LMBase{
     // declare discount
     private final double discount;
 
+    /**
+     * Constructor for constructing a discount smoothed language model from a file.
+     * Unigram and bigram maps are populated from the file.
+     *
+     * @param filename the file to read from
+     * @param discount discount to smooth with
+     */
     public DiscountLMModel(String filename, double discount) {
         super(filename);
         this.discount = discount;

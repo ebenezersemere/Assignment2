@@ -46,18 +46,18 @@ public class InterpolationLMModel extends LMBase {
         return lambda * unigramProb + (1 - lambda) * bigramProb;
     }
 
-        public static void main(String[] args) {
-        String train = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/sentences_train";
-        String development = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/sentences_development";
-        String test= "data/sentences_testing";
-
-        List<Double> lambdaList = Arrays.asList(1.0, 0.99, 0.9, 0.75, 0.5, 0.25, 0.1, .01, .001, .0001);
-
-        for (double lambda : lambdaList){
-            InterpolationLMModel model = new InterpolationLMModel(train, lambda);
-            double perplexity = model.getPerplexity(test);
-            System.out.println(perplexity);
-            System.out.println(lambda);
-        }
-    }
+//        public static void main(String[] args) {
+//        String train = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/sentences_train";
+//        String development = "/Users/ezraford/Desktop/School/CS 159/Git/Assignment2/data/sentences_development";
+//        String test= "data/sentences_testing";
+//
+//        List<Double> lambdaList = Arrays.asList(1.0, 0.99, 0.9, 0.75, 0.5, 0.25, 0.1, .01, .001, .0001);
+//
+//        for (double lambda : lambdaList){
+//            InterpolationLMModel model = new InterpolationLMModel(train, lambda);
+//            double perplexity = model.getPerplexity(test);
+//            System.out.println(perplexity);
+//            System.out.println(lambda);
+//        }
+//    }
 }
