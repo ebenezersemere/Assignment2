@@ -37,7 +37,7 @@ abstract class LMBase implements LMModel {
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 // split line into words
-                String[] line = scanner.nextLine().split("\\s");
+                String[] line = scanner.nextLine().split("\\s+");
 
                 // add <s> to start of line & increment unigram count
                 unigram.put("<s>", unigram.get("<s>") + 1);
@@ -91,10 +91,9 @@ abstract class LMBase implements LMModel {
     }
 
     /**
-     * logProb calculates the sum of the log probabilities of all bigrams in a sentence.
+     * Given a sentence, return the log of the probability of the sentence based on the LM.
      *
-     * @param first
-     * @param second
+     * @param sentWords the words in the sentence.  sentWords should NOT contain <s> or </s>.
      * @return the log probability of a sentence
      */
     public double logProb(ArrayList<String> sentWords) {
@@ -115,10 +114,11 @@ abstract class LMBase implements LMModel {
     }
 
     /**
-     * getPerplexity calculates the perplexity of a file.
+     * Given a text file, calculate the perplexity of the text file, that is the negative average per word log
+     * probability
      *
-     * @param filename the file to read from
-     * @return the perplexity of the file
+     * @param filename a text file.  The file will contain sentences WITHOUT <s> or </s>.
+     * @return the perplexity of the text in file based on the LM
      */
     public double getPerplexity(String filename) {
         // initialize sum and bigram counter

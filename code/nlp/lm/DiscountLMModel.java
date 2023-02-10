@@ -17,12 +17,19 @@ public class DiscountLMModel extends LMBase{
 
     /**
      * getBigramProb computes the probability of the second word given the first word with discount smoothing
-     * @param first
-     * @param second
+     * @param first the first word in the bigram
+     * @param second the second word in the bigram
      * @return p(second | first)
      */
     @Override
     public double getBigramProb(String first, String second){
+        // check whether first and second are in vocabulary
+        if (!bigram.containsKey(first))
+            first = "<unk>";
+
+        if (!unigram.containsKey(second))
+            second = "<unk>";
+
         // calculate reserved mass
         double reservedMass = (bigram.get(first).size() * discount) / (unigram.get(first));
 
@@ -43,62 +50,25 @@ public class DiscountLMModel extends LMBase{
 
         // discount if we have the bigram, otherwise multiply alpha by p(second)
         if (bigram.get(first).containsKey(second))
-            return bigram.get(first).get(second) - discount;
+            return (bigram.get(first).get(second) - discount) / unigram.get(first);
         else
             return alpha * (unigram.get(second) / (double) uniSum);
     }
 
-
-    public static void main(String[] args) {
-//        String filenameMain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences";
-//        String filenameABC = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/abc.txt";
+//    public static void main(String[] args) {
+//        String train = "data/sentences_shuffle_train";
+//        String development = "data/sentences_shuffle_development";
+//        String test= "data/sentences_shuffle_test";
 //
-//        double discount = 0.5;
 //
-//        DiscountLMModel model = new DiscountLMModel(filenameABC, discount);
-
-        String filenameTrain = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences_train";
-        String filenameDev = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences_development";
-        String filenameTest = "/Users/ebenezersemere/Workspace/Natural Language Processing/Assignment2/data/sentences_testing";
-
-//        double discount = .1;
-
-        List<Double> discount = Arrays.asList(0.99, 0.9, 0.75, 0.5, 0.25, 0.1);
-
-        for (double disc : discount){
-            LambdaLMModel model = new LambdaLMModel(filenameTrain, disc);
-            double perplexity = model.getPerplexity(filenameTest);
-            System.out.println(perplexity);
-            System.out.println(disc);
-        }
-
-//        // Dev
-//        2210.1003431764807
-//        0.99
-//        2106.3371327748073
-//        0.9
-//        1924.609132693029
-//        0.75
-//        1588.2300828933421
-//        0.5
-//        1176.5117951541981
-//        0.25
-//        837.5045562172319
-//        0.1
-
-//        // Test
-//        2145.079988806118
-//        0.99
-//        2043.8582581124003
-//        0.9
-//        1866.658917449232
-//        0.75
-//        1538.9459009003788
-//        0.5
-//        1138.4251166815525
-//        0.25
-//        809.2941685685007
-//        0.1
-
-    }
+//        List<Double> discount = Arrays.asList(0.99, 0.9, 0.75, 0.5, 0.25, 0.1, .01, .001, .0001);
+//
+//        for (double disc : discount){
+//            LambdaLMModel model = new LambdaLMModel(train, disc);
+//            double perplexity = model.getPerplexity(development);
+//            System.out.println(perplexity);
+//            System.out.println(disc);
+//        }
+//    }
 }
+
